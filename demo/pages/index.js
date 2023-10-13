@@ -1,10 +1,8 @@
-// pages/index.js
-
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getAllRecipes } from '../helpers/db-util';
 
-export default function Home() {
+const Home = () => {
   const [recipes, setRecipes] = useState([]);
 
   useEffect(() => {
@@ -13,7 +11,7 @@ export default function Home() {
         const recipesData = await getAllRecipes(0, 10);
         setRecipes(recipesData);
       } catch (error) {
-        console.error('Error fetching recipes:', error);
+        console.error('Error fetching recipes:', error.message);
       }
     };
 
@@ -34,4 +32,6 @@ export default function Home() {
       </ul>
     </div>
   );
-}
+};
+
+export default Home;

@@ -1,28 +1,27 @@
-// components/categories/CategoriesComponent.js
-
 import React, { useEffect, useState } from 'react';
 import { getAllCategories } from '../../helpers/db-util';
-import RecipeListComponent from '../recipe/recipe-list';
+import { Button } from '@mui/material';
 
 const CategoriesComponent = () => {
   const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const pageSize = 10;
+
+  const fetchCategories = async () => {
+    try {
+      const categoriesData = await getAllCategories(currentPage, pageSize);
+      setCategories((prevCategories) => [...prevCategories, ...categoriesData]);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const categoriesData = await getAllCategories();
-        setCategories(categoriesData);
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-      }
-    };
-
     fetchCategories();
-  }, []);
+  }, [currentPage]);
 
-  const handleCategoryClick = (category) => {
-    setSelectedCategory(category);
+  const handleLoadMore = () => {
+    setCurrentPage((prevPage) => prevPage + 1);
   };
 
   return (
@@ -30,14 +29,15 @@ const CategoriesComponent = () => {
       <h2>Categories</h2>
       <ul>
         {categories.map((category, index) => (
-          <li key={index} onClick={() => handleCategoryClick(category)}>
+          <li key={index} onClick={() => console.log('Category clicked:', category)}>
             {category.category}
           </li>
         ))}
       </ul>
-
-      {selectedCategory && (
-        <RecipeListComponent categoryId={selectedCategory._id} categoryName={selectedCategory.category} />
+      {categories.length >= pageSize && (
+        <Button variant="outlined" color="primary" onClick={handleLoadMore}>
+          Load More
+        </Button>
       )}
     </div>
   );

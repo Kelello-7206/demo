@@ -1,6 +1,6 @@
-// helpers/db-util.js
-
 import { MongoClient } from 'mongodb';
+
+const DATABASE_URL = process.env.MONGO_URI;
 
 let cachedClient = null;
 
@@ -10,7 +10,7 @@ export async function connectDatabase() {
   }
 
   try {
-    const client = await MongoClient.connect(process.env.MONGO_URI, {
+    const client = await MongoClient.connect(DATABASE_URL, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
@@ -23,13 +23,13 @@ export async function connectDatabase() {
   }
 }
 
-export async function getAllAllergens() {
+export async function getAllAllergens(page, pageSize) {
   try {
     const client = await connectDatabase();
     const db = client.db();
     const allergens = db.collection('allergens');
 
-    const documents = await allergens.find().toArray();
+    const documents = await allergens.find().skip(page * pageSize).limit(pageSize).toArray();
     return documents;
   } catch (error) {
     console.error('Error getting allergens from MongoDB:', error);
@@ -37,13 +37,13 @@ export async function getAllAllergens() {
   }
 }
 
-export async function getAllCategories() {
+export async function getAllCategories(page, pageSize) {
   try {
     const client = await connectDatabase();
     const db = client.db();
     const categories = db.collection('categories');
 
-    const documents = await categories.find().toArray();
+    const documents = await categories.find().skip(page * pageSize).limit(pageSize).toArray();
     return documents;
   } catch (error) {
     console.error('Error getting categories from MongoDB:', error);
@@ -51,13 +51,19 @@ export async function getAllCategories() {
   }
 }
 
-export async function getAllRecipes(page, pageSize) {
+export async function getAllRecipes(page, pageSize, categoryId) {
   try {
     const client = await connectDatabase();
     const db = client.db();
     const recipes = db.collection('recipes');
 
-    const documents = await recipes.find().skip(page * pageSize).limit(pageSize).toArray();
+    let query = {};  // Initial query
+
+    if (categoryId) {
+      query.categoryId = categoryId;  // Modify the query to include categoryId
+    }
+
+    const documents = await recipes.find(query).skip(page * pageSize).limit(pageSize).toArray();
     return documents;
   } catch (error) {
     console.error('Error getting recipes from MongoDB:', error);

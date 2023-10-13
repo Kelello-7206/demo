@@ -1,4 +1,4 @@
-// components/recipe/RecipeItemComponent.js
+// components/recipe/recipe-item.js
 
 import React from 'react';
 import { Card, CardContent, Typography } from '@mui/material';
@@ -26,6 +26,23 @@ const StyledListItem = styled.li`
   margin-bottom: 10px;
 `;
 
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      // Modify the getAllRecipes call to include categoryId
+      const recipesData = await getAllRecipes(0, 10, categoryId);
+      const allergensData = await getAllAllergens();
+      setRecipes(recipesData);
+      setAllergens(allergensData);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  fetchData();
+}, [categoryId]); // Add categoryId to the dependency array
+
+
 const RecipeItemComponent = ({ recipe, allergens }) => {
   const hasAllergen = allergens.some((allergen) => recipe.tags.includes(allergen));
 
@@ -51,7 +68,7 @@ const RecipeItemComponent = ({ recipe, allergens }) => {
           Servings: {recipe.servings}
         </Typography>
         <Typography color="text.secondary" gutterBottom>
-          Published: {recipe.published}
+          Published: {new Date(recipe.published).toLocaleDateString()}
         </Typography>
 
         <Typography color="text.secondary" gutterBottom>
@@ -65,6 +82,15 @@ const RecipeItemComponent = ({ recipe, allergens }) => {
           ))}
         </StyledList>
       </CardContent>
+      {recipe.images && recipe.images.length > 0 && (
+        <StyledImage src={recipe.images[0]} alt={recipe.title} />
+      )}
+      {/* Display other recipe information like ingredients, instructions, nutrition, etc. */}
+      {/* Add appropriate UI components to display these details */}
+      {/* Example: */}
+      {/* <Typography color="text.secondary" gutterBottom>
+        Ingredients: {recipe.ingredients.join(', ')}
+      </Typography> */}
     </StyledCard>
   );
 };
